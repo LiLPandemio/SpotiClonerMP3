@@ -1,2 +1,4 @@
 # Ignorar el archivo config.py
-config.py
+config.ini
+# Ignorar archivos y directorios de desarrollo
+DEV.*/

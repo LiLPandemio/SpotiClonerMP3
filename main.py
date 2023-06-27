@@ -1,51 +1,45 @@
+import configparser
 import os
 import spotipy
-import spotipy.util as util
-import spotipy.oauth2 as oauth2
-from configparser import ConfigParser
+from spotipy.oauth2 import SpotifyOAuth
+import subprocess
 
-# Leer las credenciales y la ruta base del archivo de configuración
-config = ConfigParser()
-config.read('config.py')
+config = configparser.ConfigParser()
+config.read('config.ini')
 
-client_id = config.get('Spotify', 'client_id')
-client_secret = config.get('Spotify', 'client_secret')
-redirect_uri = config.get('Spotify', 'redirect_uri')
-username = config.get('Spotify', 'username')
-base_path = config.get('General', 'base_path')
+client_id = config.get('spotify', 'client_id')
+client_secret = config.get('spotify', 'client_secret')
+redirect_uri = config.get('spotify', 'redirect_uri')
+output_dir = config.get('download', 'output_dir')
 
-# Autorización de Spotify
-credentials = oauth2.SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
-token = credentials.get_access_token()
-spotify = spotipy.Spotify(auth=token)
+# Autenticación con Spotify
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope='playlist-read-private'))
 
-# Obtener todas las playlists del usuario
-playlists = spotify.user_playlists(username)
+# Obtener la lista de playlists del usuario
+playlists = sp.current_user_playlists()
 
-# Recorrer las playlists
+# Descargar cada canción de cada playlist en la biblioteca
 for playlist in playlists['items']:
+    fullfile = ""
     playlist_name = playlist['name']
-    playlist_path = os.path.join(base_path, playlist_name)
-
-    # Crear la carpeta de la playlist si no existe
-    if not os.path.exists(playlist_path):
-        os.makedirs(playlist_path)
-
-    # Obtener las canciones de la playlist
-    results = spotify.user_playlist(username, playlist['id'], fields="tracks,next")
-    tracks = results['tracks']
-    
-    # Descargar cada canción en la playlist
-    while tracks:
-        for item in tracks['items']:
-            track = item['track']
-            song_title = track['name']
-            artist = track['artists'][0]['name']
-            file_name = f"{song_title} ({artist}).mp3"
-            file_path = os.path.join(playlist_path, file_name)
-
-            # Descargar la canción en la ruta especificada
-            os.system(f"spotify-dl --output '{file_path}' '{track['external_urls']['spotify']}'")
-
-        # Obtener la siguiente página de resultados
-        tracks = spotify.next(tracks)
+    playlist_id = playlist['id']
+    output_path = os.path.join(output_dir, playlist_name)
+    os.makedirs(output_path, exist_ok=True)
+    playlist_tracks = sp.playlist_tracks(playlist_id, fields='items(track(name,artists,name,id,external_urls))')
+    song_folder = os.path.normpath(os.path.join(output_dir, playlist_name)).replace(":", "")
+    linx="cd \"" + song_folder + "\"\n"
+    for track in playlist_tracks['items']:
+        track_title = track['track']['name']
+        track_artist = track['track']['artists'][0]['name']
+        track_id = track['track']['id']
+        
+        #Crear la carpeta si no existe de la playlist descargando
+        lin1="spotdl \""+ track_title + " - " + track_artist +"\"\n" 
+        print(song_folder + "/" + track_title)
+        fullfile += linx
+        fullfile += lin1 
+        linx=""
+    os.makedirs(song_folder, exist_ok=True)
+    with open("temp.ps1", "a", encoding='utf-16LE') as myfile:
+        myfile.write(fullfile)
+    fullfile = ""
