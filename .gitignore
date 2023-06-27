@@ -2,3 +2,5 @@
 config.ini
 # Ignorar archivos y directorios de desarrollo
 DEV.*/
+# Ignorar el archivo cache
+.cache
