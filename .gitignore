@@ -4,3 +4,4 @@ config.ini
 DEV.*/
 # Ignorar el archivo cache
 .cache
+*temp*
