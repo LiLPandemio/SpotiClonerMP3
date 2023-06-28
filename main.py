@@ -2,7 +2,7 @@ import configparser                         # Para leer el archivo config.ini
 import os                                   # Manipulacion de directorios
 import spotipy                              # Autenticacion en spotify
 from spotipy.oauth2 import SpotifyOAuth     # Para gestionar el oauth de spotify
-
+from functions import song_exists
 """
 TODO: Comprobar si la cancion existe. En ese caso no hay que añadirla al script. Esto acelera mucho el proceso ya que spotdl es lento comprobando esto.
 """
@@ -56,16 +56,19 @@ for playlist in playlists['items']:
         # Acomodar los valores actuales en variables
         track_title = track['track']['name']                                # Titulo de la cancion
         track_artist = track['track']['artists'][0]['name']                 # Artista principal de la cancion
-        
+
         # Añadir a la playlist las canciones en formato EXTINF
         with open(archivo_m3u, "a", encoding="utf-8") as playlist_file:     # Añadir al archivo m3u la cancion
             playlist_file.write("#EXTINF:-1," + track_artist + " - " + track_title + "\n") # Especifica el titulo
             playlist_file.write("./" + track_artist + " - " + track_title + ".mp3" + "\n") # Especifica el path
 
         # Añadir al script de descarga la cancion en el formato del comando.
-        nextline = "spotdl '" + track_title + " - " + track_artist + "'\n"  # La linea en el script tempsh
-        print(output_dir + " | " + nextline)                                # Muestra por pantalla el comando generado
-        tempsh_file += nextline                                             # Añade la linea al archivo tempsh
+        if not (song_exists(title=track_title, artist=track_artist, path=output_dir)):
+            nextline = "spotdl '" + track_title + " - " + track_artist + "'\n"  # La linea en el script tempsh
+            print(output_dir + " | " + nextline)                                # Muestra por pantalla el comando generado
+            tempsh_file += nextline                                             # Añade la linea al archivo tempsh
+        else:
+            print(output_dir + " | " + f"Ya existe {track_title} - {track_artist}")                                # Muestra por pantalla el comando generado
         #Fin del bucle
 
     #Limpieza de simbolos en titulos de canciones y escritura del script
