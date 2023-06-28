@@ -9,11 +9,10 @@ python_pid=$!
 # Esperar a que python3 main.py termine
 wait $python_pid
 
-# Ejecutar temp.sh con bash
-bash temp.sh
-
-# Esperar a que bash temp.sh termine
-wait
+# Ejecutar temp.sh con bash linea a linea para que si falla una cancion no se detenga
+while IFS= read -r line; do
+  eval "$line" || true
+done < temp.sh
 
 # Borrar temp.sh
 rm temp.sh
