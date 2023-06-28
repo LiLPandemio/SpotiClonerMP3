@@ -3,9 +3,6 @@ import os                                   # Manipulacion de directorios
 import spotipy                              # Autenticacion en spotify
 from spotipy.oauth2 import SpotifyOAuth     # Para gestionar el oauth de spotify
 from functions import song_exists
-"""
-TODO: Comprobar si la cancion existe. En ese caso no hay que añadirla al script. Esto acelera mucho el proceso ya que spotdl es lento comprobando esto.
-"""
 
 # Leer config
 config = configparser.ConfigParser()
