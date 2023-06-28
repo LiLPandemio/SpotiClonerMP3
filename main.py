@@ -67,7 +67,6 @@ for playlist in playlists['items']:
         print(output_dir + " | " + nextline)                                # Muestra por pantalla el comando generado
         tempsh_file += nextline                                             # Añade la linea al archivo tempsh
         #Fin del bucle
-        #Fin del bucle
 
     #Limpieza de simbolos en titulos de canciones y escritura del script
     clean_content = tempsh_file.replace(':', '').replace('*', '').replace('?', '').replace('"', '').replace('<', '').replace('>', '').replace('|', '').replace('\\', '/').replace("//", "/") # Elimina caracteres prohibidos de los filenames
